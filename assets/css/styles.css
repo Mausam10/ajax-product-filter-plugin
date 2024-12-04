@@ -1,0 +1,160 @@
+/* Filter Form Styles */
+.apf-filter-wrapper {
+    margin-bottom: 2em;
+    padding: 1em;
+    background: #f8f8f8;
+    border-radius: 4px;
+}
+
+.apf-filter-form {
+    margin: 0;
+}
+
+.apf-filter-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.apf-filter-item {
+    margin-bottom: 0.5em;
+}
+
+.apf-filter-item label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.apf-filter-checkbox {
+    margin-right: 0.5em;
+}
+
+.apf-reset-filter {
+    margin-top: 1em;
+    width: 100%;
+}
+
+/* Loading State */
+.apf-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1em 2em;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Count Badge */
+.apf-filter-item .count {
+    margin-left: 0.5em;
+    font-size: 0.85em;
+    color: #666;
+}
+
+/* Admin Styles */
+.apf-preset-form {
+    max-width: 800px;
+    margin-top: 2em;
+}
+
+.apf-preset-table {
+    margin-top: 2em;
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 768px) {
+    .apf-filter-wrapper {
+        padding: 0.75em;
+    }
+    
+    .apf-filter-item label {
+        font-size: 0.95em;
+    }
+}
+/* Widget CSS */
+.apf-filter-wrapper {
+    margin-bottom: 20px;
+}
+
+.apf-filter-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.apf-filter-item {
+    margin-bottom: 5px;
+}
+
+.apf-filter-item label {
+    display: flex;
+    align-items: center;
+}
+
+.apf-filter-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.count {
+    margin-left: 5px;
+    color: #666;
+}
+
+/* css for loading state */
+.apf-filter-wrapper {
+    margin-bottom: 20px;
+}
+
+.apf-filter-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.apf-filter-item {
+    margin-bottom: 8px;
+}
+
+.apf-filter-item label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.apf-filter-checkbox {
+    margin-right: 8px;
+}
+
+.apf-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+.products.loading {
+    opacity: 0.5;
+    position: relative;
+}
+
+.count {
+    margin-left: 5px;
+    color: #999;
+    font-size: 0.9em;
+}
+
+.apf-reset-filter {
+    margin-top: 15px;
+    width: 100%;
+}
