@@ -1,0 +1,168 @@
+/* Desktop Styles */
+.apf-filter-panel,
+.apf-filter-overlay,
+.apf-filter-toggle {
+  display: none; /* Hide mobile elements by default */
+}
+
+/* Widget default styles */
+.widget_apf_filter {
+  margin-bottom: 20px;
+  padding: 15px;
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 991px) {
+  /* Show mobile elements */
+  .apf-filter-toggle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    cursor: pointer;
+    z-index: 999997;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease;
+  }
+
+  /* Panel Styles */
+  .apf-filter-panel {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    max-width: 350px;
+    height: 100vh;
+    background: #fff;
+    z-index: 999999;
+    transition: left 0.3s ease-in-out;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .apf-filter-toggle:hover {
+    background: #444;
+}
+
+.apf-filter-toggle svg {
+    width: 24px;
+    height: 24px;
+}
+
+  .apf-filter-panel.active {
+    left: 0;
+  }
+
+  /* Overlay */
+  .apf-filter-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999998;
+  }
+
+  .apf-filter-overlay.active {
+    display: block;
+  }
+
+  /* Panel Header */
+  .apf-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+  }
+
+  .apf-panel-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .apf-panel-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    color: #333;
+  }
+
+  /* Hide desktop widgets in mobile view */
+  .widget-area .widget_apf_filter {
+    display: none;
+  }
+}
+
+/* Panel Content Styles */
+.apf-filter-panel .widget_apf_filter {
+  padding: 0;
+  margin: 0 0 20px 0;
+  border: none;
+}
+
+/* Mobile optimization */
+@media screen and (max-width: 480px) {
+  .apf-filter-panel {
+    max-width: 100%;
+  }
+}
+
+/* Loading state styling for mobile panel */
+/* Loading State Styles */
+.apf-loading {
+    position: relative;
+}
+
+.apf-loading:after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(to right, #333 30%, #eee 30%);
+    background-size: 200% 100%;
+    animation: loading-bar 1s linear infinite;
+    z-index: 999999;
+}
+
+@keyframes loading-bar {
+    from { background-position: right bottom; }
+    to { background-position: left bottom; }
+}
+
+/* Disable pointer events during loading */
+.apf-loading .products {
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+/* Active filter indication */
+.apf-filter-toggle.has-active-filters:after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 8px;
+    height: 8px;
+    background: #e33;
+    border-radius: 50%;
+}

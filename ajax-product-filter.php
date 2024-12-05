@@ -21,6 +21,8 @@ require_once APF_PLUGIN_DIR . 'includes/ajax-product-filter-widget.php';
 require_once APF_PLUGIN_DIR . 'includes/ajax-product-filter-functions.php';
 require_once APF_PLUGIN_DIR . 'includes/ajax-product-filter-ajax.php';
 require_once APF_PLUGIN_DIR . 'includes/class-font-loader.php';
+require_once APF_PLUGIN_DIR . 'includes/class-apf-mobile-panel.php';
+require_once APF_PLUGIN_DIR . 'includes/class-apf-go-to-top.php';
 
 class Ajax_Product_Filter {
     private static $instance = null;
