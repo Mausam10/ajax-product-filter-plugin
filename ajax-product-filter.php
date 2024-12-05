@@ -20,6 +20,7 @@ define('APF_VERSION', '1.0.0');
 require_once APF_PLUGIN_DIR . 'includes/ajax-product-filter-widget.php';
 require_once APF_PLUGIN_DIR . 'includes/ajax-product-filter-functions.php';
 require_once APF_PLUGIN_DIR . 'includes/ajax-product-filter-ajax.php';
+require_once APF_PLUGIN_DIR . 'includes/class-font-loader.php';
 
 class Ajax_Product_Filter {
     private static $instance = null;

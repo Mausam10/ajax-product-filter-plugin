@@ -97,20 +97,19 @@ jQuery(function($) {
 
         showLoader() {
             if (!this.loader) {
-                this.loader = $('<div class="apf-loader">Loading...</div>');
-                this.productsContainer.parent().append(this.loader);
+                this.loader = $('<div class="apf-loader"><div class="spinner"></div></div>');
+                $('body').append(this.loader);  // Append to body instead of container
             }
             this.productsContainer.addClass('loading');
             this.loader.show();
         }
-
+        
         hideLoader() {
             if (this.loader) {
                 this.loader.hide();
+                this.productsContainer.removeClass('loading');
             }
-            this.productsContainer.removeClass('loading');
         }
-
         resetFilters() {
             this.filterForm.find('input:checked').prop('checked', false);
             this.performAjaxFilter();
