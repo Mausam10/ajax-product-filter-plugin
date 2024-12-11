@@ -98,10 +98,10 @@ class Ajax_Product_Filter {
         add_submenu_page(
             'woocommerce',
             __('AJAX Filter Presets', 'ajax-product-filter'),
-            __('AJAX Filter Presets', 'ajax-product-filter'),
-            'manage_woocommerce',
+            __('AJAX PRODUCT FILTER', 'ajax-product-filter'),
+            'manage_options',
             'apf-filter-presets',
-            array($this, 'render_admin_page')
+            'apf_render_presets_page'
         );
     }
 
@@ -126,3 +126,16 @@ function init_ajax_product_filter() {
 
 // Hook initialization to WordPress init to ensure all required functions are available
 add_action('init', 'init_ajax_product_filter');
+
+// Debug
+add_action('admin_init', function() {
+    error_log('Admin init triggered');
+});
+
+// Include the admin page
+function apf_include_admin_files() {
+    if (is_admin()) {
+        require_once plugin_dir_path(__FILE__) . 'includes/admin/presets-page.php';
+    }
+}
+add_action('plugins_loaded', 'apf_include_admin_files');
