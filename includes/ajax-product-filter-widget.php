@@ -90,9 +90,9 @@ class APF_Product_Filter_Widget extends WP_Widget {
                     <?php endforeach; ?>
                 </ul>
 
-                <button type="button" class="apf-reset-filter button">
-                    <?php esc_html_e('Reset', 'ajax-product-filter'); ?>
-                </button>
+                <!-- <button type="button" class="apf-reset-filter button">
+                    <?php //esc_html_e('Reset', 'ajax-product-filter'); ?>
+                </button> -->
             </form>
         </div>
         <?php
