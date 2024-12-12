@@ -3,7 +3,7 @@
  * Plugin Name: AJAX Product Filter for WooCommerce Shop
  * Description: A plugin that adds AJAX-based product filtering to WooCommerce.
  * Version: 1.0
- * Author: Mausam101
+ * Author: Mausam1011
  * Text Domain: ajax-product-filter
  */
 
