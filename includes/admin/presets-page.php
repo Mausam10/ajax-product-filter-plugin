@@ -4,8 +4,19 @@ if (!defined('ABSPATH')) {
 }
 
 // Helper Functions
+function debug_presets() {
+    $presets = get_option('apf_filter_presets');
+    error_log('Debug Presets: ' . print_r($presets, true));
+
+    $widgets = get_option('widget_apf_product_filter');
+    error_log('Debug Widgets: ' . print_r($widgets, true));
+}
+add_action('init', 'debug_presets');
+
+// Modified get_presets function
 function apf_get_presets() {
     $presets = get_option('apf_filter_presets', array());
+    error_log('Retrieved presets: ' . print_r($presets, true));
     return is_array($presets) ? $presets : array();
 }
 
@@ -22,7 +33,7 @@ function apf_get_available_taxonomies() {
         $taxonomies['product_cat'] = array(
             'name' => 'product_cat',
             'label' => __('Product Categories', 'ajax-product-filter'),
-            'hierarchical' => true
+            'hierarchical' => false
         );
     }
     
@@ -79,7 +90,7 @@ function apf_handle_preset_actions() {
             'name' => sanitize_text_field($_POST['preset_name']),
             'taxonomy' => $taxonomy,
             'allow_multiple' => isset($_POST['allow_multiple']),
-            'show_hierarchy' => isset($_POST['show_hierarchy']) && $available_taxonomies[$taxonomy]['hierarchical'],
+            // 'show_hierarchy' => isset($_POST['show_hierarchy']) && $available_taxonomies[$taxonomy]['hierarchical'],
             'modified_at' => current_time('mysql')
         );
 
@@ -223,13 +234,13 @@ function apf_render_presets_page() {
                                 Allow multiple selections
                             </label>
                             <br>
-                            <label class="hierarchy-option" style="display: none;">
+                            <!-- <label class="hierarchy-option" style="display: none;">
                                 <input type="checkbox" 
                                        name="show_hierarchy" 
                                        value="1" 
-                                       <?php checked($editing && !empty($edit_preset['show_hierarchy'])); ?>>
+                                       <?php //checked($editing && !empty($edit_preset['show_hierarchy'])); ?>>
                                 Show hierarchy
-                            </label>
+                            </label> -->
                         </fieldset>
                     </td>
                 </tr>
@@ -298,7 +309,7 @@ function apf_render_presets_page() {
         }
     </style>
 
-    <script type="text/javascript">
+    <!-- <script type="text/javascript">
     jQuery(document).ready(function($) {
         function updateHierarchyOption() {
             var selectedOption = $('#taxonomy option:selected');
@@ -316,6 +327,6 @@ function apf_render_presets_page() {
         $('#taxonomy').on('change', updateHierarchyOption);
         updateHierarchyOption(); // Run on page load
     });
-    </script>
+    </script> -->
     <?php
 }
