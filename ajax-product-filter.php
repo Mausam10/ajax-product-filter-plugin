@@ -22,9 +22,16 @@ require_once APF_PLUGIN_DIR . 'includes/ajax-product-filter-functions.php';
 require_once APF_PLUGIN_DIR . 'includes/ajax-product-filter-ajax.php';
 require_once APF_PLUGIN_DIR . 'includes/class-font-loader.php';
 require_once APF_PLUGIN_DIR . 'includes/class-apf-mobile-panel.php';
+require_once APF_PLUGIN_DIR . 'includes/class-apf-price-slider-widget.php';
+require_once APF_PLUGIN_DIR . 'includes/class-apf-ajax-handler.php';
+require_once APF_PLUGIN_DIR . 'includes/class-apf-loader.php';
+// require_once APF_PLUGIN_DIR . 'includes/class-apf-active-filter-widget.php';
+// require_once APF_PLUGIN_DIR . 'templates/price-slider.php';
+
 
 class Ajax_Product_Filter {
     private static $instance = null;
+
 
     public static function get_instance() {
         if (null === self::$instance) {
