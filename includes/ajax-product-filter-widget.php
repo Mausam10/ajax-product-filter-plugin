@@ -7,32 +7,30 @@ if (!defined('ABSPATH')) {
  * APF Product Filter Widget
  */
 class APF_Product_Filter_Widget extends WP_Widget {
-    /**
-     * Widget constructor
-     */
+    
+    private $defaults = array(
+        'title' => '',
+        'preset_id' => 0
+    );
+
     public function __construct() {
         parent::__construct(
-            'apf_product_filter', // Base ID
-            'Product Filter (AJAX)', // Widget name in admin
+            'apf_product_filter',
+            __('Product Filter (AJAX)', 'ajax-product-filter'),
             array(
                 'description' => __('Filter WooCommerce products with AJAX', 'ajax-product-filter'),
-                'classname' => 'widget_apf_filter', // Widget CSS class
+                'classname' => 'widget_apf_filter',
             )
         );
     }
 
-    /**
-     * Front-end display of widget
-     */
     public function widget($args, $instance) {
-        // Check if WooCommerce is active
         if (!class_exists('WooCommerce')) {
             return;
         }
 
-        // Get widget settings
-        $title = !empty($instance['title']) ? $instance['title'] : '';
-        $title = apply_filters('widget_title', $title, $instance, $this->id_base);
+        $instance = wp_parse_args($instance, $this->defaults);
+        $title = apply_filters('widget_title', $instance['title'], $instance, $this->id_base);
         $preset_id = !empty($instance['preset_id']) ? absint($instance['preset_id']) : 0;
 
         // Get presets
@@ -54,22 +52,48 @@ class APF_Product_Filter_Widget extends WP_Widget {
         echo $args['after_widget'];
     }
 
-    /**
-     * Render the filter form
-     */
-    private function render_filter_form($preset_id, $preset) {
-        if (empty($preset['taxonomy']) || !taxonomy_exists($preset['taxonomy'])) {
-            return;
+    private function get_filter_terms($taxonomy) {
+        // Ensure we have a valid taxonomy
+        if (!taxonomy_exists($taxonomy)) {
+            return array();
         }
 
-        $terms = get_terms(array(
-            'taxonomy' => $preset['taxonomy'],
+        // Query args specific to the taxonomy type
+        $args = array(
+            'taxonomy' => $taxonomy,
             'hide_empty' => true,
-        ));
+            'fields' => 'all'
+        );
 
-        if (is_wp_error($terms) || empty($terms)) {
+        // Add specific arguments for product categories
+        if ($taxonomy === 'product_cat') {
+            $args['hierarchical'] = true;
+            $args['orderby'] = 'name';
+            $args['show_count'] = true;
+            $args['pad_counts'] = true;
+        }
+
+        // Get terms specifically for this taxonomy
+        $terms = get_terms($args);
+
+        if (is_wp_error($terms)) {
+            return array();
+        }
+
+        return $terms;
+    }
+
+    private function render_filter_form($preset_id, $preset) {
+        if (empty($preset['taxonomy'])) {
             return;
         }
+
+        $terms = $this->get_filter_terms($preset['taxonomy']);
+        
+        if (empty($terms)) {
+            return;
+        }
+
         ?>
         <div class="apf-filter-wrapper" data-preset="<?php echo esc_attr($preset_id); ?>">
             <form class="apf-filter-form">
@@ -90,31 +114,33 @@ class APF_Product_Filter_Widget extends WP_Widget {
                     <?php endforeach; ?>
                 </ul>
 
-                <!-- <button type="button" class="apf-reset-filter button">
-                    <?php //esc_html_e('Reset', 'ajax-product-filter'); ?>
-                </button> -->
+                <div class="apf-filter-actions">
+                    <!-- <button type="button" class="apf-reset-filter button">
+                        <?php //esc_html_e('Reset', 'ajax-product-filter'); ?>
+                    </button> -->
+                    <!-- <button type="submit" class="apf-apply-filter button button-primary">
+                        <?php //esc_html_e('Apply', 'ajax-product-filter'); ?>
+                    </button> -->
+                </div>
             </form>
         </div>
         <?php
     }
 
-    /**
-     * Back-end widget form
-     */
     public function form($instance) {
-        $title = isset($instance['title']) ? $instance['title'] : '';
-        $preset_id = isset($instance['preset_id']) ? $instance['preset_id'] : '';
+        $instance = wp_parse_args($instance, $this->defaults);
         $presets = get_option('apf_filter_presets', array());
+    
         ?>
         <p>
             <label for="<?php echo esc_attr($this->get_field_id('title')); ?>">
                 <?php esc_html_e('Title:', 'ajax-product-filter'); ?>
             </label>
             <input class="widefat" 
+                   type="text" 
                    id="<?php echo esc_attr($this->get_field_id('title')); ?>" 
                    name="<?php echo esc_attr($this->get_field_name('title')); ?>" 
-                   type="text" 
-                   value="<?php echo esc_attr($title); ?>">
+                   value="<?php echo esc_attr($instance['title']); ?>">
         </p>
         
         <p>
@@ -124,40 +150,39 @@ class APF_Product_Filter_Widget extends WP_Widget {
             <select class="widefat" 
                     id="<?php echo esc_attr($this->get_field_id('preset_id')); ?>" 
                     name="<?php echo esc_attr($this->get_field_name('preset_id')); ?>">
-                <option value=""><?php esc_html_e('Select a preset', 'ajax-product-filter'); ?></option>
+                <option value="0"><?php esc_html_e('Select a preset', 'ajax-product-filter'); ?></option>
                 <?php foreach ($presets as $key => $preset): ?>
-                    <option value="<?php echo esc_attr($key); ?>" <?php selected($preset_id, $key); ?>>
-                        <?php echo esc_html($preset['name']); ?>
+                    <?php
+                    $preset_name = !empty($preset['name']) ? $preset['name'] : sprintf(__('Preset %d', 'ajax-product-filter'), $key);
+                    $taxonomy_label = '';
+                    if (!empty($preset['taxonomy'])) {
+                        $taxonomy_obj = get_taxonomy($preset['taxonomy']);
+                        if ($taxonomy_obj) {
+                            $taxonomy_label = ' (' . $taxonomy_obj->labels->singular_name . ')';
+                        }
+                    }
+                    ?>
+                    <option value="<?php echo absint($key); ?>" <?php selected($instance['preset_id'], $key); ?>>
+                        <?php echo esc_html($preset_name . $taxonomy_label); ?>
                     </option>
                 <?php endforeach; ?>
             </select>
+            <span class="description">
+                <?php esc_html_e('Select a filter preset to configure the display options.', 'ajax-product-filter'); ?>
+            </span>
         </p>
-        
-        <?php if (empty($presets)): ?>
-            <p class="description">
-                <?php 
-                printf(
-                    __('No presets found. <a href="%s">Create a preset</a> first.', 'ajax-product-filter'),
-                    esc_url(admin_url('admin.php?page=apf-filter-presets'))
-                );
-                ?>
-            </p>
-        <?php endif;
+        <?php
     }
 
-    /**
-     * Sanitize widget form values as they are saved
-     */
     public function update($new_instance, $old_instance) {
-        $instance = array();
-        $instance['title'] = (!empty($new_instance['title'])) ? strip_tags($new_instance['title']) : '';
-        $instance['preset_id'] = (!empty($new_instance['preset_id'])) ? absint($new_instance['preset_id']) : '';
-        return $instance;
+        return array(
+            'title' => !empty($new_instance['title']) ? strip_tags($new_instance['title']) : '',
+            'preset_id' => !empty($new_instance['preset_id']) ? absint($new_instance['preset_id']) : 0,
+        );
     }
 }
 
 // Register the widget
-function register_apf_widget() {
+add_action('widgets_init', function() {
     register_widget('APF_Product_Filter_Widget');
-}
-add_action('widgets_init', 'register_apf_widget');
+});
