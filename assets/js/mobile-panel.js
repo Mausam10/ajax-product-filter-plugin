@@ -22,31 +22,26 @@
             this.bindEvents();
             this.removeIndividualResetButtons();
             this.updateSpinnerImplementation();
+            this.initPriceSlider();
         }
 
-        // New method to handle spinner implementation
         updateSpinnerImplementation() {
-            // Find all WooCommerce buttons that might need spinners
             $('.woocommerce button.button').each(function() {
                 const $button = $(this);
                 
-                // Create spinner element
                 const $spinner = $('<span>', {
                     class: 'spinner-border spinner-border-sm me-2',
                     role: 'status',
                     'aria-hidden': 'true'
                 }).hide();
                 
-                // Add spinner to button
                 $button.prepend($spinner);
                 
-                // Update loading state handler
                 $button.on('loading.wc', function() {
                     $spinner.show();
                     $button.prop('disabled', true);
                 });
                 
-                // Update complete state handler
                 $button.on('complete.wc', function() {
                     $spinner.hide();
                     $button.prop('disabled', false);
@@ -77,16 +72,82 @@
         }
 
         moveFiltersToPanel() {
-            $('.widget-area .widget_apf_filter').each((index, widget) => {
+            $('.widget-area .widget_apf_filter, .widget-area .widget_apf_price_filter').each((index, widget) => {
                 const clone = $(widget).clone(true);
                 clone.find('.reset-button, .reset-filters').remove();
                 this.panel.append(clone);
             });
         }
 
+        initPriceSlider() {
+            if (!$('#price-slider').length) return;
+
+            const $slider = $('#price-slider');
+            const $form = $slider.closest('form');
+            const $minInput = $form.find('.min-price-input');
+            const $maxInput = $form.find('.max-price-input');
+            const $minDisplay = $form.find('.price-from');
+            const $maxDisplay = $form.find('.price-to');
+
+            $slider.slider({
+                range: true,
+                min: parseFloat($slider.data('min')),
+                max: parseFloat($slider.data('max')),
+                step: parseFloat($slider.data('step')),
+                values: [
+                    parseFloat($minInput.val()),
+                    parseFloat($maxInput.val())
+                ],
+                slide: (event, ui) => {
+                    const [min, max] = ui.values;
+                    this.updatePriceDisplay(min, max, $minDisplay, $maxDisplay);
+                    $minInput.val(min);
+                    $maxInput.val(max);
+                },
+                stop: (event, ui) => {
+                    if (typeof apf_update_products === 'function') {
+                        apf_update_products($form);
+                    }
+                }
+            });
+        }
+
+        updatePriceDisplay(min, max, $minDisplay, $maxDisplay) {
+            const formatPrice = (price) => {
+                return this.woocommerce_price_format(price, priceSliderData.currency_symbol);
+            };
+
+            $minDisplay.html(formatPrice(min));
+            $maxDisplay.html(formatPrice(max));
+        }
+
+        woocommerce_price_format(price, symbol) {
+            const formatted = price.toFixed(2);
+            const format = priceSliderData.price_format;
+            return format.replace('%1$s', symbol).replace('%2$s', formatted);
+        }
+
         resetFilters() {
             this.panel.find('.apf-filter-checkbox:checked').prop('checked', false);
             $('.widget-area .apf-filter-checkbox:checked').prop('checked', false);
+            
+            // Reset price slider if it exists
+            const $slider = $('#price-slider');
+            if ($slider.length) {
+                const min = parseFloat($slider.data('min'));
+                const max = parseFloat($slider.data('max'));
+                $slider.slider('values', [min, max]);
+                
+                const $form = $slider.closest('form');
+                const $minInput = $form.find('.min-price-input');
+                const $maxInput = $form.find('.max-price-input');
+                const $minDisplay = $form.find('.price-from');
+                const $maxDisplay = $form.find('.price-to');
+                
+                $minInput.val(min);
+                $maxInput.val(max);
+                this.updatePriceDisplay(min, max, $minDisplay, $maxDisplay);
+            }
             
             const forms = this.panel.find('form');
             forms.each((_, form) => {
@@ -139,6 +200,7 @@
                     if (wasMobile !== this.isMobile) {
                         if (this.isMobile) {
                             this.setupMobileView();
+                            this.initPriceSlider(); // Reinitialize price slider after view change
                         } else {
                             this.closePanel();
                         }
