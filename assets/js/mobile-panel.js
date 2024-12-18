@@ -72,7 +72,7 @@
         }
 
         moveFiltersToPanel() {
-            $('.widget-area .widget_apf_filter, .widget-area .widget_apf_price_filter').each((index, widget) => {
+            $('.widget-area .widget_apf_filter').each((index, widget) => {
                 const clone = $(widget).clone(true);
                 clone.find('.reset-button, .reset-filters').remove();
                 this.panel.append(clone);
@@ -89,20 +89,20 @@
             const $minDisplay = $form.find('.price-from');
             const $maxDisplay = $form.find('.price-to');
 
+            const min = parseFloat($slider.data('min'));
+            const max = parseFloat($slider.data('max'));
+
             $slider.slider({
                 range: true,
-                min: parseFloat($slider.data('min')),
-                max: parseFloat($slider.data('max')),
+                min: min,
+                max: max,
                 step: parseFloat($slider.data('step')),
-                values: [
-                    parseFloat($minInput.val()),
-                    parseFloat($maxInput.val())
-                ],
+                values: [min, max],
                 slide: (event, ui) => {
-                    const [min, max] = ui.values;
-                    this.updatePriceDisplay(min, max, $minDisplay, $maxDisplay);
-                    $minInput.val(min);
-                    $maxInput.val(max);
+                    const [sliderMin, sliderMax] = ui.values;
+                    this.updatePriceDisplay(sliderMin, sliderMax, $minDisplay, $maxDisplay);
+                    $minInput.val(sliderMin);
+                    $maxInput.val(sliderMax);
                 },
                 stop: (event, ui) => {
                     if (typeof apf_update_products === 'function') {
@@ -110,11 +110,15 @@
                     }
                 }
             });
+
+            // Store initial values for reset
+            $slider.data('initial-min', min);
+            $slider.data('initial-max', max);
         }
 
         updatePriceDisplay(min, max, $minDisplay, $maxDisplay) {
             const formatPrice = (price) => {
-                return this.woocommerce_price_format(price, priceSliderData.currency_symbol);
+                return this.woocommerce_price_format(price, apfMobilePanel.currencySymbol);
             };
 
             $minDisplay.html(formatPrice(min));
@@ -123,33 +127,43 @@
 
         woocommerce_price_format(price, symbol) {
             const formatted = price.toFixed(2);
-            const format = priceSliderData.price_format;
+            const format = apfMobilePanel.priceFormat;
             return format.replace('%1$s', symbol).replace('%2$s', formatted);
         }
 
         resetFilters() {
+            // Reset checkboxes
             this.panel.find('.apf-filter-checkbox:checked').prop('checked', false);
             $('.widget-area .apf-filter-checkbox:checked').prop('checked', false);
             
-            // Reset price slider if it exists
+            // Reset price slider
             const $slider = $('#price-slider');
             if ($slider.length) {
-                const min = parseFloat($slider.data('min'));
-                const max = parseFloat($slider.data('max'));
-                $slider.slider('values', [min, max]);
+                const initialMin = $slider.data('initial-min');
+                const initialMax = $slider.data('initial-max');
                 
+                // Reset slider UI
+                $slider.slider('values', [initialMin, initialMax]);
+                
+                // Reset form inputs
                 const $form = $slider.closest('form');
                 const $minInput = $form.find('.min-price-input');
                 const $maxInput = $form.find('.max-price-input');
                 const $minDisplay = $form.find('.price-from');
                 const $maxDisplay = $form.find('.price-to');
                 
-                $minInput.val(min);
-                $maxInput.val(max);
-                this.updatePriceDisplay(min, max, $minDisplay, $maxDisplay);
+                $minInput.val(initialMin);
+                $maxInput.val(initialMax);
+                this.updatePriceDisplay(initialMin, initialMax, $minDisplay, $maxDisplay);
+                
+                // Trigger update for price filter
+                if (typeof apf_update_products === 'function') {
+                    apf_update_products($form);
+                }
             }
             
-            const forms = this.panel.find('form');
+            // Update products for checkbox filters
+            const forms = this.panel.find('form').not('.price-filter-form');
             forms.each((_, form) => {
                 const $form = $(form);
                 if (typeof apf_update_products === 'function') {
@@ -200,7 +214,7 @@
                     if (wasMobile !== this.isMobile) {
                         if (this.isMobile) {
                             this.setupMobileView();
-                            this.initPriceSlider(); // Reinitialize price slider after view change
+                            this.initPriceSlider();
                         } else {
                             this.closePanel();
                         }
@@ -236,5 +250,26 @@
     $(document).ready(() => {
         new APFMobilePanel();
     });
+    function setLoadingState(isLoading) {
+        const html = document.documentElement;
+        const body = document.body;
+        
+        if (isLoading) {
+            // Store current scroll position using modern scrollY
+            this.scrollPosition = window.scrollY;
+            // Add loading classes
+            html.classList.add('loading-active');
+            body.classList.add('filter-loading');
+            // Fix the body in place
+            body.style.top = `-${this.scrollPosition}px`;
+        } else {
+            // Remove loading classes
+            html.classList.remove('loading-active');
+            body.classList.remove('filter-loading');
+            // Restore position without movement
+            body.style.top = '';
+            window.scrollTo(0, this.scrollPosition);
+        }
+    }
 
 })(jQuery);

@@ -102,12 +102,14 @@
         formatPrice(price) {
             return this.options.currencySymbol + price.toFixed(2);
         }
-
-        filterProducts(minPrice, maxPrice) {
-            this.$productsContainer.addClass('loading');
-
-            $.ajax({
-                url: priceSliderData.ajaxurl,
+    filterProducts(minPrice, maxPrice) {
+        if (this.isLoading) return;
+        
+        this.isLoading = true;
+        document.body.classList.add('filter-loading'); // Apply to body instead
+        
+        $.ajax({
+            url: priceSliderData.ajaxurl,
                 type: 'POST',
                 data: {
                     action: 'filter_by_price',
@@ -133,19 +135,41 @@
                 error: (xhr, status, error) => {
                     console.error('Error filtering products:', error);
                 },
-                complete: () => {
-                    this.$productsContainer.removeClass('loading');
-                }
-            });
-        }
+         
+            complete: () => {
+                document.body.classList.remove('filter-loading');
+                this.isLoading = false;
+            }
+        });
     }
-
+}
     // Initialize on document ready
     $(document).ready(function() {
         $('.price-filter-wrapper').each(function() {
             new PriceSlider(this);
         });
     });
+    function setLoadingState(isLoading) {
+        const html = document.documentElement;
+        const body = document.body;
+        
+        if (isLoading) {
+            // Store current scroll position using modern scrollY
+            this.scrollPosition = window.scrollY;
+            // Add loading classes
+            html.classList.add('loading-active');
+            body.classList.add('filter-loading');
+            // Fix the body in place
+            body.style.top = `-${this.scrollPosition}px`;
+        } else {
+            // Remove loading classes
+            html.classList.remove('loading-active');
+            body.classList.remove('filter-loading');
+            // Restore position without movement
+            body.style.top = '';
+            window.scrollTo(0, this.scrollPosition);
+        }
+    }
 
 })(jQuery);
 
